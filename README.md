@@ -10,6 +10,7 @@ RGB-D → Neural Network Inference → SLM Phase Map
 [![Python](https://img.shields.io/badge/python-3.8%2B-green.svg)](https://www.python.org/)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-orange.svg)](https://isocpp.org/)
 [![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-1.26%2B-purple.svg)](https://onnxruntime.ai/)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink.svg)](https://github.com/sponsors/Lishoulan)
 
 [English](#overview) · [功能特性](#功能特性) · [快速开始](#快速开始) · [架构](#架构) · [API](#api) · [性能](#性能) · [构建](#构建)
 
@@ -372,6 +373,14 @@ phase = client.generate_hologram(rgb, depth)  # Remote inference
 ```
 
 👉 [Contact for Pro license](https://github.com/Lishoulan/AXCGH-Engine/issues/new?template=feature_request.md)
+
+### 💰 Support & Purchase
+
+| Channel | Link | For |
+|---------|------|-----|
+| GitHub Sponsors | [sponsor Lishoulan](https://github.com/sponsors/Lishoulan) | One-time or monthly donation |
+| Pro License | [Open an issue](https://github.com/Lishoulan/AXCGH-Engine/issues/new?template=feature_request.md) | Commercial license purchase |
+| Enterprise | Contact via GitHub | Custom integration & support |
 
 ## 引用
 
