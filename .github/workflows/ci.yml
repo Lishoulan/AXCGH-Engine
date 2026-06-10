@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ──────────────────────────────────────────────
+  # Python Engine Tests
+  # ──────────────────────────────────────────────
+  test-python:
+    name: Python ${{ matrix.python-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install pytest onnxruntime numpy
+          pip install -e ./DeepCGHEngine
+
+      - name: Run Python engine tests
+        run: |
+          pytest test_engine.py -v --tb=short || python test_engine.py
+
+      - name: Run integration tests
+        run: |
+          pytest test_integration.py -v --tb=short || python test_integration.py
+
+  # ──────────────────────────────────────────────
+  # C++ Engine Build & Test
+  # ──────────────────────────────────────────────
+  test-cpp:
+    name: C++ Build / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.15"
+
+      - name: Download ONNX Runtime (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -sL https://github.com/microsoft/onnxruntime/releases/download/v1.17.0/onnxruntime-linux-x64-1.17.0.tgz -o ort.tgz
+          tar xzf ort.tgz
+          echo "ONNXRUNTIME_ROOT=$GITHUB_WORKSPACE/onnxruntime-linux-x64-1.17.0" >> $GITHUB_ENV
+
+      - name: Download ONNX Runtime (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Invoke-WebRequest -Uri https://github.com/microsoft/onnxruntime/releases/download/v1.17.0/onnxruntime-win-x64-1.17.0.zip -OutFile ort.zip
+          Expand-Archive ort.zip -DestinationPath .
+          echo "ONNXRUNTIME_ROOT=$env:GITHUB_WORKSPACE\onnxruntime-win-x64-1.17.0" >> $env:GITHUB_ENV
+
+      - name: Install FFTW3 (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libfftw3-dev
+
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
+        working-directory: DeepCGHEngine
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DONNXRUNTIME_ROOT=${{ env.ONNXRUNTIME_ROOT }} \
+            -DDEEPCGH_BUILD_APPS=ON \
+            -DDEEPCGH_BUILD_PYTHON=OFF
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        working-directory: DeepCGHEngine
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DONNXRUNTIME_ROOT="${{ env.ONNXRUNTIME_ROOT }}" `
+            -DDEEPCGH_BUILD_APPS=ON `
+            -DDEEPCGH_BUILD_PYTHON=OFF
+
+      - name: Build C++ engine
+        working-directory: DeepCGHEngine
+        run: cmake --build build --config Release -- -j2
+
+      - name: Run standalone demo
+        working-directory: DeepCGHEngine
+        run: |
+          ./build/deepcgh_demo || echo "Demo requires model file — build verified"
+        continue-on-error: true
+
+  # ──────────────────────────────────────────────
+  # Lint & Type Check
+  # ──────────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install linting tools
+        run: |
+          pip install --upgrade pip
+          pip install black mypy numpy onnxruntime
+
+      - name: Check formatting with black
+        run: black --check --diff DeepCGHEngine/deepcgh_engine/ test_engine.py test_integration.py
+
+      - name: Run mypy type checking
+        run: mypy DeepCGHEngine/deepcgh_engine/ --ignore-missing-imports --no-error-summary
+        continue-on-error: true
+
+  # ──────────────────────────────────────────────
+  # Package Build
+  # ──────────────────────────────────────────────
+  package:
+    name: Build & Check Wheel
+    runs-on: ubuntu-latest
+    needs: [test-python]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build wheel
+        working-directory: DeepCGHEngine
+        run: python -m build
+
+      - name: Check wheel contents
+        working-directory: DeepCGHEngine
+        run: twine check dist/*

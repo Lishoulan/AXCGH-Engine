@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=64", "wheel", "cmake>=3.15"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "axcgh-engine"
+version = "1.0.0"
+description = "Deep learning holographic rendering engine — RGB-D to SLM phase map via U-Net inference"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Lishoulan"},
+]
+keywords = ["holography", "deep-learning", "computer-generated-hologram", "onnx", "slm", "phase-map"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Multimedia :: Graphics :: 3D Rendering",
+]
+
+dependencies = [
+    "onnxruntime>=1.16",
+    "numpy>=1.20",
+    "Pillow>=9.0",
+]
+
+[project.optional-dependencies]
+gpu = ["onnxruntime-gpu>=1.16"]
+realsense = ["pyrealsense2"]
+kinect = ["pyk4a"]
+display = ["pygame", "screeninfo"]
+dev = ["pytest", "black", "mypy", "build", "twine"]
+all = ["axcgh-engine[gpu,display]", "opencv-python"]
+
+[project.scripts]
+axcgh-demo = "deepcgh_engine.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Lishoulan/AXCGH-Engine"
+Documentation = "https://github.com/Lishoulan/AXCGH-Engine/tree/master/docs"
+Repository = "https://github.com/Lishoulan/AXCGH-Engine"
+Issues = "https://github.com/Lishoulan/AXCGH-Engine/issues"
+
+[tool.setuptools.packages.find]
+include = ["deepcgh_engine*"]
+
+[tool.setuptools.package-data]
+deepcgh_engine = ["*.pyd", "*.so", "*.dll"]
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true

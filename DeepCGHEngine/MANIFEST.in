@@ -1,0 +1,12 @@
+include CMakeLists.txt
+include README.md
+include LICENSE
+include pyproject.toml
+recursive-include include *.h
+recursive-include src *.cpp
+recursive-include bindings *.cpp
+recursive-include apps *.cpp
+recursive-include cmake *.cmake *.cmake.in
+recursive-include deepcgh_engine *.py *.pyd *.so *.dll
+recursive-include tools *.py
+recursive-include models *.onnx
