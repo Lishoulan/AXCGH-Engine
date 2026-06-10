@@ -336,6 +336,43 @@ ONNX 模型仅包含 U-Net 推理部分（amp_0, phi_0），IFFT 后处理在引
 | CMake | ≥ 3.15 | Build system |
 | GCC/MSVC | C++17 | Compiler |
 
+## 🚀 AXCGH-Engine Pro
+
+Need GPU acceleration, TensorRT, multi-GPU, or cloud inference?
+
+| Feature | Community (Free) | Pro ($499/yr) | Enterprise ($2,999/yr) |
+|---------|-----------------|---------------|----------------------|
+| CPU Inference | ✅ | ✅ | ✅ |
+| CUDA GPU | — | ✅ | ✅ |
+| TensorRT FP16/INT8 | — | ✅ | ✅ |
+| Multi-GPU | — | ✅ | ✅ |
+| High-Res Models (512/1080p) | — | ✅ | ✅ |
+| SLM SDK (Holoeye/Meadowlark) | — | ✅ | ✅ |
+| Cloud API | — | 10K frames/yr | Unlimited |
+| Priority Support | — | ✅ | ✅ |
+| Custom Model Training | — | — | ✅ |
+
+```bash
+pip install axcgh-engine-pro
+export AXCGH_LICENSE_KEY=your-key
+```
+
+```python
+from axcgh_pro import ProEngineAPI, CloudEngineClient
+
+# Local GPU + TensorRT
+engine = ProEngineAPI()
+engine.init("model.onnx", tensorrt_fp16=True, multi_gpu=True)
+phase = engine.generate_hologram(rgb, depth)  # 200+ FPS on RTX 4090
+
+# Cloud API
+client = CloudEngineClient()
+client.connect(api_key="your-key")
+phase = client.generate_hologram(rgb, depth)  # Remote inference
+```
+
+👉 [Contact for Pro license](https://github.com/Lishoulan/AXCGH-Engine/issues/new?template=feature_request.md)
+
 ## 引用
 
 If you use AXCGH-Engine in your research, please cite the original DeepCGH paper:

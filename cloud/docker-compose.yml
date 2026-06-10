@@ -1,0 +1,127 @@
+version: "3.8"
+
+services:
+  # -----------------------------------------------------------------------
+  # API Server
+  # -----------------------------------------------------------------------
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile.gpu
+    command: >
+      uvicorn app:app
+      --host 0.0.0.0
+      --port 8000
+      --workers 4
+      --loop uvloop
+      --log-level info
+    environment:
+      - AXCGH_MODEL_PATH=/app/models/deepcgh_unet.onnx
+      - AXCGH_MODEL_HEIGHT=256
+      - AXCGH_MODEL_WIDTH=256
+      - AXCGH_GPU_CONFIG=0:t4
+      - AXCGH_API_KEYS=${AXCGH_API_KEYS:-demo:standard:10000:t4}
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://axcgh:axcgh_secret@postgres:5432/axcgh_cloud
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-data:/app/models:ro
+      - trt-cache:/root/.trt_cache
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - axcgh-net
+
+  # -----------------------------------------------------------------------
+  # GPU Worker (A100 tier — optional, scale horizontally)
+  # -----------------------------------------------------------------------
+  gpu-worker-a100:
+    build:
+      context: ..
+      dockerfile: Dockerfile.gpu
+    command: >
+      python -m axcgh_cloud.worker
+      --tier a100
+      --redis redis://redis:6379/0
+    environment:
+      - AXCGH_MODEL_PATH=/app/models/deepcgh_unet.onnx
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - model-data:/app/models:ro
+      - trt-cache:/root/.trt_cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - a100
+    restart: unless-stopped
+    networks:
+      - axcgh-net
+
+  # -----------------------------------------------------------------------
+  # Redis — Rate Limiting + Job Queue
+  # -----------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - axcgh-net
+
+  # -----------------------------------------------------------------------
+  # PostgreSQL — Usage Tracking & Billing
+  # -----------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: axcgh_cloud
+      POSTGRES_USER: axcgh
+      POSTGRES_PASSWORD: axcgh_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U axcgh -d axcgh_cloud"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - axcgh-net
+
+volumes:
+  redis-data:
+  postgres-data:
+  model-data:
+    external: true
+  trt-cache:
+
+networks:
+  axcgh-net:
+    driver: bridge

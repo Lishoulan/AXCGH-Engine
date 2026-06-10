@@ -1,0 +1,9 @@
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0
+numpy>=1.20
+onnxruntime-gpu>=1.16
+redis>=5.0
+psycopg2-binary>=2.9
+python-multipart>=0.0.6
+axcgh-engine>=1.0.0
