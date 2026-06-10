@@ -3,6 +3,10 @@ name: Deploy Docs
 on:
   push:
     branches: [master]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/docs.yml'
 
 permissions:
   contents: read
@@ -21,64 +25,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
         with:
-          python-version: "3.11"
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints
-          pip install -e ./DeepCGHEngine
-
-      - name: Create docs directory
-        run: mkdir -p docs/source
-
-      - name: Generate API docs
-        run: |
-          cat > docs/source/conf.py << 'PYEOF'
-          project = "DeepCGHEngine"
-          copyright = "2024, DeepCGHEngine Project"
-          author = "DeepCGHEngine Project"
-          extensions = [
-              "sphinx.ext.autodoc",
-              "sphinx.ext.napoleon",
-              "sphinx.ext.viewcode",
-              "sphinx_autodoc_typehints",
-          ]
-          templates_path = ["_templates"]
-          exclude_patterns = []
-          html_theme = "sphinx_rtd_theme"
-          html_static_path = ["_static"]
-          PYEOF
-
-          cat > docs/source/index.rst << 'RSTEOF'
-          DeepCGHEngine Documentation
-          ===========================
-
-          .. toctree::
-             :maxdepth: 2
-             :caption: API Reference
-
-          API Reference
-          -------------
-
-          .. automodule:: deepcgh_engine
-             :members:
-             :undoc-members:
-             :show-inheritance:
-          RSTEOF
-
-      - name: Build Sphinx docs
-        run: |
-          sphinx-build -b html docs/source docs/build
+          source: docs
+          destination: ./_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build
+          path: ./_site
 
   deploy:
     name: Deploy to GitHub Pages
