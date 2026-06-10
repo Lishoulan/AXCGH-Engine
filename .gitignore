@@ -1,0 +1,53 @@
+# Build
+build/
+cmake-build-*/
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.pyd
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.egg-info/
+dist/
+*.egg
+.eggs/
+
+# Dependencies (too large for git)
+DeepCGHEngine/deps/
+DeepCGHEngine/deps/onnxruntime/
+DeepCGHEngine/deps/fftw/
+
+# Models (large binary files)
+DeepCGHEngine/models/*.onnx
+
+# Output
+output/
+test_slm_output/
+
+# MinGW runtime DLLs (user must provide)
+DeepCGHEngine/deepcgh_engine/libgcc_s_seh-1.dll
+DeepCGHEngine/deepcgh_engine/libwinpthread-1.dll
+DeepCGHEngine/deepcgh_engine/libstdc++-6.dll
+DeepCGHEngine/deepcgh_engine/onnxruntime.dll
+DeepCGHEngine/deepcgh_engine/libfftw3f-3.dll
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Data
+*.npy
+*.pgm
+*.raw
