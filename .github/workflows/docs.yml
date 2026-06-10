@@ -25,14 +25,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          source: docs
-          destination: ./_site
+          python-version: "3.11"
+
+      - name: Install markdown converter
+        run: pip install markdown
+
+      - name: Build static HTML docs
+        run: python docs/build.py
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

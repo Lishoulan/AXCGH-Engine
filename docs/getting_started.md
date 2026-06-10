@@ -1,8 +1,3 @@
----
-layout: default
-title: Getting Started
----
-
 # Getting Started with AXCGH-Engine
 
 This guide walks you through installing AXCGH-Engine, generating your first hologram, understanding the pipeline, and troubleshooting common issues.
