@@ -1,0 +1,79 @@
+# ============================================================================
+# AXCGH-Engine .dockerignore
+# ============================================================================
+
+# Version control
+.git
+.gitignore
+.github
+
+# Python virtual environments
+venv/
+.venv/
+env/
+.env
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Test files
+test_*.py
+tests/
+*_test.py
+benchmark_engine.py
+
+# Training scripts (not needed in production)
+train_*.py
+export_onnx*.py
+
+# Data and results (mounted as volumes)
+data/
+result/
+output/
+
+# MinGW toolchain (Windows-only, not needed in Linux containers)
+mingw64/
+mingw.7z
+w64devkit.zip
+
+# DeepCGH-master (original reference, not the engine package)
+DeepCGH-master/
+
+# Build artifacts
+DeepCGHEngine/build_demo/
+DeepCGHEngine/build/
+*.tmp
+
+# OS-specific files
+BIT3463.tmp
+
+# Docker files themselves
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Large binary archives
+*.7z
+*.zip

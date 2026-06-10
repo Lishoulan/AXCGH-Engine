@@ -63,6 +63,34 @@ from .slm_driver import (
     create_slm_driver,
 )
 
+from .slm_holoeye import (
+    HoloeyeSLM,
+    HOLOEYE_MODELS,
+)
+
+from .slm_meadowlark import (
+    MeadowlarkSLM,
+    MEADOWLARK_MODELS,
+)
+
+from .slm_hamamatsu import (
+    HamamatsuSLM,
+    HAMAMATSU_MODELS,
+)
+
+from .slm_manager import (
+    SLMManager,
+    SLMDeviceInfo,
+)
+
+from .gpu_engine import (
+    GPUEngineAPI,
+    GPUConfig,
+    CuPyIFFTPostProcessor,
+    GPUInferenceCore,
+    detect_available_providers,
+)
+
 # Try to import C++ engine (optional — falls back to pure Python)
 try:
     from ._deepcgh_engine import DeepCGHEngine as CppDeepCGHEngine
@@ -95,6 +123,14 @@ __all__ = [
     "SDKBackend",
     "FileBackend",
     "create_slm_driver",
+    "HoloeyeSLM",
+    "HOLOEYE_MODELS",
+    "MeadowlarkSLM",
+    "MEADOWLARK_MODELS",
+    "HamamatsuSLM",
+    "HAMAMATSU_MODELS",
+    "SLMManager",
+    "SLMDeviceInfo",
     "RealtimeHologramDisplay",
     "RealtimeConfig",
     "CameraType",
@@ -102,4 +138,9 @@ __all__ = [
     "RealSenseCamera",
     "KinectCamera",
     "TestPatternSource",
+    "GPUEngineAPI",
+    "GPUConfig",
+    "CuPyIFFTPostProcessor",
+    "GPUInferenceCore",
+    "detect_available_providers",
 ]

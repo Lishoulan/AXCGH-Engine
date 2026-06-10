@@ -1,0 +1,127 @@
+# ============================================================================
+# AXCGH-Engine Docker Compose
+# ============================================================================
+# Usage:
+#   CPU only:
+#     docker compose up axcgh-cpu
+#
+#   GPU (NVIDIA):
+#     docker compose up axcgh-gpu
+#
+#   Both:
+#     docker compose up
+#
+#   Build:
+#     docker compose build axcgh-cpu
+#     docker compose build axcgh-gpu
+# ============================================================================
+
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # CPU Service
+  # ---------------------------------------------------------------------------
+  axcgh-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DEVICE: cpu
+        PYTHON_VERSION: "3.10"
+    image: axcgh-engine:cpu
+    container_name: axcgh-cpu
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-data:/app/models:ro
+      - output-data:/app/output
+    environment:
+      - DEEPCGH_DEVICE=cpu
+      - DEEPCGH_MODEL_PATH=/app/models/deepcgh_unet.onnx
+      - DEEPCGH_HOST=0.0.0.0
+      - DEEPCGH_PORT=8000
+      - DEEPCGH_HEIGHT=256
+      - DEEPCGH_WIDTH=256
+      - DEEPCGH_NUM_PLANES=5
+      - DEEPCGH_INTRA_OP_THREADS=4
+      - DEEPCGH_INTER_OP_THREADS=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 1G
+
+  # ---------------------------------------------------------------------------
+  # GPU Service (NVIDIA CUDA)
+  # ---------------------------------------------------------------------------
+  axcgh-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    image: axcgh-engine:gpu
+    container_name: axcgh-gpu
+    ports:
+      - "8001:8000"
+    volumes:
+      - model-data:/app/models:ro
+      - output-data:/app/output
+    environment:
+      - DEEPCGH_DEVICE=gpu
+      - DEEPCGH_MODEL_PATH=/app/models/deepcgh_unet.onnx
+      - DEEPCGH_HOST=0.0.0.0
+      - DEEPCGH_PORT=8000
+      - DEEPCGH_HEIGHT=256
+      - DEEPCGH_WIDTH=256
+      - DEEPCGH_NUM_PLANES=5
+      - DEEPCGH_USE_CUPY=1
+      - DEEPCGH_DEVICE_ID=0
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: 8G
+        reservations:
+          memory: 2G
+    profiles:
+      - gpu
+
+# ---------------------------------------------------------------------------
+# Named volumes
+# ---------------------------------------------------------------------------
+volumes:
+  model-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./DeepCGHEngine/models
+  output-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./output
