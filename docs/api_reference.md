@@ -1,3 +1,8 @@
+---
+layout: default
+title: API Reference
+---
+
 # API Reference
 
 Complete reference for all AXCGH-Engine public APIs.

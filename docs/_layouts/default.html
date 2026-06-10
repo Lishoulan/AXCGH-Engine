@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.min.css">
+  <style>
+    body { max-width: 980px; margin: 0 auto; padding: 45px; }
+    .nav { margin-bottom: 2em; padding-bottom: 1em; border-bottom: 1px solid #eaecef; }
+    .nav a { margin-right: 1em; text-decoration: none; color: #0366d6; }
+    .nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="{{ site.baseurl }}/">Home</a>
+    {% for item in site.navigation %}
+    <a href="{{ site.baseurl }}/{{ item.url }}.html">{{ item.title }}</a>
+    {% endfor %}
+    <a href="https://github.com/Lishoulan/AXCGH-Engine">GitHub</a>
+  </div>
+  <article class="markdown-body">
+    {{ content }}
+  </article>
+</body>
+</html>

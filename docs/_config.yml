@@ -1,0 +1,15 @@
+title: AXCGH-Engine
+description: Deep Learning Computer-Generated Holography Engine
+theme: jekyll-theme-cayman
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+navigation:
+  - title: Getting Started
+    url: getting_started
+  - title: API Reference
+    url: api_reference
+  - title: Architecture
+    url: architecture

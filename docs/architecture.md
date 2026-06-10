@@ -1,3 +1,8 @@
+---
+layout: default
+title: Architecture
+---
+
 # Architecture Deep Dive
 
 This document provides a comprehensive look at the internal architecture of AXCGH-Engine, including system structure, module responsibilities, data flow, memory management, FFT implementation comparison, and ONNX model structure.
